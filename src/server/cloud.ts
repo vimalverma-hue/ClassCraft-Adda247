@@ -1,4 +1,4 @@
-import {cleanContent,refinementUnits,validateRefinement,type Refinement} from '../refinement';
+import {cleanContent,refinementUnits,validateRefinement,type Refinement} from '../refinement.js';
 export type RefinementEnv={GROQ_API_KEY?:string;GROQ_MODEL?:string;OPENAI_API_KEY?:string;OPENAI_MODEL?:string;GEMINI_API_KEY?:string;GEMINI_MODEL?:string};
 export function refinementProvider(env:RefinementEnv){
  if(env.GEMINI_API_KEY)return {name:'Gemini',key:env.GEMINI_API_KEY,model:env.GEMINI_MODEL||'gemini-3.5-flash-lite',endpoint:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'};

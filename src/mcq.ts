@@ -1,5 +1,5 @@
-import {joinQuestionNumber,isQuestionNumberLine} from './questionText';
-import {readAnswerKey,answerKeyNumber} from './answerKey';
+import {joinQuestionNumber,isQuestionNumberLine} from './questionText.js';
+import {readAnswerKey,answerKeyNumber} from './answerKey.js';
 /** Local MCQ extraction. Source content is never rewritten or sent to a service. */
 export type MCQOption={label:string;text:string;marked:boolean};
 export type ExtractedMCQ={id:string;number?:string;question:string;options:MCQOption[];text:string;answerText:string;correctOption?:number;answerWarning?:string};

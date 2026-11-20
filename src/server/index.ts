@@ -1,4 +1,4 @@
-import {refinementStatus,handleRefinement,type RefinementEnv} from './cloud';
+import {refinementStatus,handleRefinement,type RefinementEnv} from './cloud.js';
 type Env=RefinementEnv&{ASSETS?:{fetch:(request:Request)=>Promise<Response>}};
 // Shared Web Request handler used by the Vercel API entry points.
 export default {async fetch(request:Request,env:Env){

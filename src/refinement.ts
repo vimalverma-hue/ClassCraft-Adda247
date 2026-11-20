@@ -1,5 +1,5 @@
-import {mcqOptionLine,extractMCQs} from './mcq';
-import {readAnswerKey} from './answerKey';
+import {mcqOptionLine,extractMCQs} from './mcq.js';
+import {readAnswerKey} from './answerKey.js';
 const structuredAnswerKey=(text:string)=>{const key=readAnswerKey(text);return !!(key.entries.length||key.trailing);};
 export type Refinement={text:string;removed:string[];warnings:string[]};
 export const refinementModel={id:'onnx-community/Qwen3-0.6B-ONNX-OPT',revision:'4799e655597b49210adb5c1ebe5b9d3bd04005a0'};

@@ -1,5 +1,5 @@
 import {env} from 'node:process';
-import worker from './index';
+import worker from './index.js';
 
 // Keep provider credentials on the server, outside the Vite client bundle.
 export default {

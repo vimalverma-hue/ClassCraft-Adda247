@@ -1,4 +1,4 @@
-import {isQuestionNumberLine} from './questionText';
+import {isQuestionNumberLine} from './questionText.js';
 
 export type AnswerKeyEntry={number:string;answer:string};
 export const answerKeyNumber=(text:string)=>text.replace(/[०-९]/g,c=>String(c.charCodeAt(0)-0x966)).replace(/^0+(?=\d)/,'');
