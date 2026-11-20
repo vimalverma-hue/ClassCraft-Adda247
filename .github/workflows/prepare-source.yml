@@ -67,6 +67,10 @@ jobs:
             expect(result).toContain('Node ESM API smoke test passed');
           },30000);
           RUNTIME_TEST
+      - name: Use the Vercel-compatible TypeScript compiler
+        run: |
+          npm pkg set devDependencies.typescript=5.9.3
+          npm install --package-lock-only --ignore-scripts --no-fund
       - name: Install, build, test and audit
         run: |
           npm ci --no-fund
@@ -77,8 +81,8 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add api src tests
+          git add api src tests package.json package-lock.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Fix Node ESM API imports and test compiled runtime'
+            git commit -m 'Use Vercel-compatible TypeScript compiler'
             git push origin HEAD:main
           fi
