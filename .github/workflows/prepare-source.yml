@@ -71,7 +71,7 @@ jobs:
         run: |
           npm ci --no-fund
           npm run build
-          npm test
+          npm test -- --maxWorkers=2
           npm audit
       - name: Commit verified runtime fixes when needed
         run: |
