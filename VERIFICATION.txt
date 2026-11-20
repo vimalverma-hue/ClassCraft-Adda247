@@ -1,0 +1,24 @@
+ClassCraft Adda247 - Vercel export
+Prepared: 2026-11-20
+
+Checks completed on the separate Vercel copy:
+- Clean dependency install: npm ci --no-audit --no-fund (passed).
+- Production build: npm run build (passed, including TypeScript validation).
+- Test suite: npm test -- --reporter=dot --maxWorkers=4 (50 files, 362 tests passed).
+- Vercel entry points: health, provider status, same-origin/method/body validation,
+  refinement and translation tested. Provider HTTP calls were mocked; no live key was used.
+- Production frontend in Chrome: HTTP 200, ClassCraft Adda247 title, sample content
+  creates 2 MCQs plus Welcome/Thumbnail/Thank-you, no browser runtime errors or broken images.
+  Browser smoke test used mocked no-key status responses; API behavior was tested separately.
+- The old language-order test's default gap expectation was updated from 60 to the
+  current 36 px fallback; production slide layout code was not changed.
+- Source package scanned for credential patterns; all three example API keys are blank.
+- Original app checkout was left unchanged.
+
+Notes:
+- The full test suite needs substantial memory/CPU (animated timer/PPT generation).
+  Four workers avoid contention on small laptops.
+- No live Vercel deployment or paid-provider request was performed.
+- Existing large-JavaScript-chunk warnings are non-blocking.
+- Generated document/OCR runtimes and node_modules are recreated during installation/build,
+  so they are intentionally excluded from this source ZIP.

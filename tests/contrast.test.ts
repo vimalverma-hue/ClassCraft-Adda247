@@ -1,0 +1,9 @@
+import {it,expect} from 'vitest';
+import fs from 'node:fs';
+import {readableColour,contrastRatio} from '../src/colourContrast';
+import {newProject,setVariant,type TemplateSet} from '../src/model';
+import {createMCQDeck} from '../src/mcqSlides';
+import {resolveSlide} from '../src/layout';
+import {answerOverlay} from '../src/answers';
+it('adjusts light/dark labels to at least 4.5 contrast without changing a colour that already passes',()=>{expect(contrastRatio('#000000','#ffffff')).toBe(21);for(const seed of ['#ffffff','#000000','#ffff00','#0000ff','#e21b2e','#777777'])for(const bg of ['#191b1c','#ffffff','#bbf7d0'])expect(contrastRatio(readableColour(seed,bg),bg)).toBeGreaterThanOrEqual(4.5);expect(readableColour('#000000','#ffffff')).toBe('#000000');});
+it('keeps Q.1 and all option labels in sync through repeated theme switches and readable answer reveals',()=>{const t=JSON.parse(fs.readFileSync('public/templates/manifest.json','utf8')) as TemplateSet;let p=newProject();p.source='Q.1 Capital?\nA) Delhi\nB) Mumbai\nAnswer: A';p.style.labelColor='#ffff00';p=createMCQDeck(p,t).project;const colours:string[]=[];for(const v of ['light','dark','light','dark'] as const){p=setVariant(p,v);const s=p.slides[0],r=resolveSlide(p,s,t,0),labels=r.elements.filter(e=>e.id==='question'||e.id.startsWith('option-')).map(e=>e.runs!.find(v=>v.color)!.color!);expect(new Set(labels).size).toBe(1);expect(contrastRatio(labels[0],r.background)).toBeGreaterThanOrEqual(4.5);colours.push(labels[0]);const a=answerOverlay(s,r)!;expect(contrastRatio(a.runs!.find(v=>v.color)!.color!,a.fill!)).toBeGreaterThanOrEqual(4.5);expect(p.style.labelColor).toBe(v==='dark'?'#ffff00':'#e21b2e');expect(labels[0]).toBe(p.style.labelColor);}expect(colours[0]).toBe(colours[2]);expect(colours[1]).toBe(colours[3]);expect(colours[0]).not.toBe(colours[1]);});

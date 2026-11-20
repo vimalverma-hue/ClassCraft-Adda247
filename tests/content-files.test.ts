@@ -1,0 +1,26 @@
+import {it,expect,beforeAll} from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import JSZip from 'jszip';
+import {jsPDF} from 'jspdf';
+import {initSync} from 'office-oxide-wasm/web';
+import {extractContent,decodeText,rtfText,htmlText} from '../src/contentFiles';
+import {extractPdf,pdfLines} from '../src/pdfContent';
+import {extractMCQs} from '../src/mcq';
+const bytes=(s:string)=>new TextEncoder().encode(s);
+const fixture=(ext:string)=>new Uint8Array(fs.readFileSync('tests/fixtures/lesson.'+ext));
+beforeAll(()=>{initSync({module:fs.readFileSync('node_modules/office-oxide-wasm/web/office_oxide_bg.wasm')});});
+it('extracts actual Word DOCX headings, Hindi questions and supplied answers',async()=>{const r=await extractContent(fixture('docx'),'lesson.docx');expect(r.text).toContain('# Indian Constitution');expect(r.text).toContain('supreme law');const mcqs=extractMCQs(r.text);expect(mcqs.questions).toHaveLength(1);expect(mcqs.questions[0].correctOption).toBe(1);expect(mcqs.questions[0].question).toContain('राजधानी');});
+it('extracts legacy binary DOC and PPT locally through the bundled WASM reader',async()=>{for(const ext of ['doc','ppt']){const r=await extractContent(fixture(ext),'lesson.'+ext);expect(r.text).toContain('भारत');expect(r.text).toContain('नई दिल्ली');expect(r.warnings.join(' ')).toContain('Legacy');}});
+it('uses PowerPoint presentation order and skips duplicate answer-overlay text while retaining its answer',async()=>{const r=await extractContent(fixture('pptx'),'lesson.pptx');expect(r.pages).toBe(4);expect(r.warnings.join(' ')).toContain('Slides 1, 4');expect(r.text.match(/B\) नई दिल्ली/g)).toHaveLength(1);const mcqs=extractMCQs(r.text);expect(mcqs.questions).toHaveLength(1);expect(mcqs.questions[0].correctOption).toBe(1);});
+it('reads actual RTF unicode content without leaking fonts, metadata, or picture payloads',async()=>{const r=await extractContent(fixture('rtf'),'lesson.rtf');expect(r.text).toContain('भारत');expect(r.text).toContain('supreme law');expect(r.text).not.toContain('fonttbl');expect(rtfText('{\\rtf1{\\fonttbl hidden;}Hi \\u2349?\\u2366? \\par Next}')).toBe('Hi भा \nNext');});
+it('extracts actual PDF selectable Hindi and English text and warns on image-only pages',async()=>{
+ const assets={workerSrc:pathToFileURL(path.resolve('node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs')).href,base:path.resolve('node_modules/pdfjs-dist').replaceAll('\\','/')+'/'};
+ const r=await extractPdf(fixture('pdf'),()=>{},assets);expect(r.text).toContain('supreme law');expect(r.text).toContain('भारत');expect(extractMCQs(r.text).questions[0]?.correctOption).toBe(1);
+ const empty=new jsPDF();await expect(extractContent(new Uint8Array(empty.output('arraybuffer')),'scan.pdf',()=>{},{pdf:(data,progress)=>extractPdf(data,progress,assets)})).rejects.toThrow('no selectable text');
+});
+it('keeps PDF word gaps and line endings rather than joining question and options',()=>{expect(pdfLines([{str:'Q.1',transform:[1,0,0,1,10,100],width:20,height:12},{str:'Question?',transform:[1,0,0,1,36,100],width:70,height:12,hasEOL:true},{str:'A) Delhi',transform:[1,0,0,1,10,80],width:40,height:12}])).toBe('Q.1 Question?\nA) Delhi');});
+it('extracts JSON/CSV question-bank records into labelled MCQs and ordinary CSV into tables',async()=>{const json=await extractContent(bytes(JSON.stringify([{question:'Capital?',options:['Delhi','Mumbai'],answer:'A'}])),'bank.json');expect(extractMCQs(json.text).questions[0].correctOption).toBe(0);const csv=await extractContent(bytes('question,A,B,answer\n"Which city, in India?",Delhi,Mumbai,A'),'bank.csv');expect(csv.text).toContain('Which city, in India?');expect(extractMCQs(csv.text).questions[0].correctOption).toBe(0);expect((await extractContent(bytes('Year,Value\n2026,10'),'table.csv')).text).toBe('Year\tValue\n2026\t10');});
+it('handles UTF-8/UTF-16 text and extracts safe HTML as plain editable text',async()=>{expect(decodeText(new Uint8Array([255,254,65,0,66,0]))).toBe('AB');expect((await extractContent(bytes('भारत\n\nTopic'),'note.md')).text).toBe('भारत\n\nTopic');expect(htmlText('<h1>Heading</h1><script>secret()</script><p>Hello <b>class</b></p><ul><li>First</li></ul>')).toContain('# Heading');expect(htmlText('<script>alert(1)</script><p>Visible</p>')).toBe('Visible');});
+it('preserves OpenDocument heading/body order and rejects missing, empty or unsupported documents',async()=>{const z=new JSZip();z.file('content.xml','<office:document-content xmlns:office="urn:office" xmlns:text="urn:text"><office:body><text:h>Heading 1</text:h><text:p>First paragraph.</text:p><text:h>Heading 2</text:h><text:p>Second paragraph.</text:p></office:body></office:document-content>');const r=await extractContent(await z.generateAsync({type:'uint8array'}),'notes.odt');expect(r.text).toBe('# Heading 1\n\nFirst paragraph.\n\n# Heading 2\n\nSecond paragraph.');await expect(extractContent(new Uint8Array(),'empty.txt')).rejects.toThrow('empty');await expect(extractContent(bytes('text'),'bad.exe')).rejects.toThrow('Unsupported');await expect(extractContent(await new JSZip().generateAsync({type:'uint8array'}),'bad.docx')).rejects.toThrow('Missing document part');});

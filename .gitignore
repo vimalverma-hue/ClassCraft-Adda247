@@ -1,0 +1,12 @@
+node_modules/
+dist/
+public/readers/
+.vercel/
+*.log
+.env
+.env.*
+!.env.example
+.dev.vars
+.wrangler/
+.openai/
+test-output/

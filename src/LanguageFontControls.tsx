@@ -1,0 +1,4 @@
+import {fontFamilies,fontLabel,type LanguageFonts} from './languageFonts';
+export function LanguageFontControls({value,onChange,disabled=false,prefix=''}:{value:LanguageFonts;onChange:(value:LanguageFonts)=>void;disabled?:boolean;prefix?:string}){
+ return <div className="field-pair language-font-fields">{(['hindiFont','englishFont'] as const).map(key=><label className="field" key={key}><span>{key==='hindiFont'?'Hindi font':'English font'}</span><select aria-label={prefix+(key==='hindiFont'?'Hindi font':'English font')} value={value[key]||''} disabled={disabled} onChange={event=>onChange({[key]:event.target.value})}><option value="">Same as main font</option>{fontFamilies.filter(font=>key!=='hindiFont'||font!=='Aptos').map(font=><option key={font} value={font}>{fontLabel(font)}</option>)}</select></label>)}</div>;
+}

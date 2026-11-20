@@ -1,0 +1,53 @@
+{
+  "name": "classcraft-adda247",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "predev": "node scripts/sync-readers.mjs",
+    "build": "node scripts/sync-readers.mjs && tsc --noEmit && vite build && node scripts/compress-large-wasm.mjs",
+    "test": "vitest run",
+    "preview": "vite preview --host 127.0.0.1",
+    "start": "npm run preview"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans": "5.3.0",
+    "@fontsource/noto-sans-devanagari": "5.3.0",
+    "@fontsource/rajdhani": "5.3.0",
+    "@huggingface/transformers": "4.3.2",
+    "@tesseract.js-data/eng": "1.0.0",
+    "@tesseract.js-data/hin": "1.0.0",
+    "@xmldom/xmldom": "0.9.12",
+    "cfb": "1.2.2",
+    "html-to-image": "1.11.13",
+    "idb": "8.0.3",
+    "jspdf": "4.2.1",
+    "jszip": "3.10.1",
+    "katex": "0.19.1",
+    "lucide-react": "0.468.0",
+    "office-oxide-wasm": "0.1.8",
+    "pdfjs-dist": "6.5.438",
+    "pptxgenjs": "4.0.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "tesseract.js": "7.0.0"
+  },
+  "devDependencies": {
+    "@types/katex": "0.16.7",
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "fake-indexeddb": "6.2.4",
+    "jsdom": "26.1.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  },
+  "overrides": {
+    "image-size": "2.1.0"
+  }
+}

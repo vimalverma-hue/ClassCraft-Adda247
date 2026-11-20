@@ -1,0 +1,236 @@
+{
+  "dark": {
+    "slides": [
+      {
+        "index": 0,
+        "name": "Original slide 1",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/dark/slide-1.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "name": "Original slide 2",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Paste Your Thumbnail",
+            "runs": [
+              {
+                "text": "Paste Your ",
+                "bold": false
+              },
+              {
+                "text": "Thumbnail",
+                "bold": true
+              }
+            ],
+            "x": 587.13,
+            "y": 516.17,
+            "w": 788.17,
+            "h": 189.03,
+            "size": 36.0,
+            "color": "#E21220",
+            "font": "Rajdhani",
+            "align": "center"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "name": "Original slide 3",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/dark/slide-3.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "name": "Original slide 4",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/dark/slide-4.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "name": "Original slide 5",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/dark/slide-5.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "name": "Original slide 6",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/dark/slide-6.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "name": "Original slide 7",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/dark/slide-7.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      }
+    ],
+    "original": "/templates/Adda247 Class PPT Dark.pptx"
+  },
+  "light": {
+    "slides": [
+      {
+        "index": 0,
+        "name": "Original slide 1",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/light/slide-1.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "name": "Original slide 2",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Paste Your Thumbnail",
+            "runs": [
+              {
+                "text": "Paste Your ",
+                "bold": false
+              },
+              {
+                "text": "Thumbnail",
+                "bold": true
+              }
+            ],
+            "x": 587.13,
+            "y": 516.17,
+            "w": 788.17,
+            "h": 189.03,
+            "size": 36.0,
+            "color": "#E21220",
+            "font": "Rajdhani",
+            "align": "center"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "name": "Original slide 3",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/light/slide-3.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "name": "Original slide 4",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/light/slide-4.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "name": "Original slide 5",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/light/slide-5.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "name": "Original slide 6",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/light/slide-6.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "name": "Original slide 7",
+        "items": [
+          {
+            "kind": "image",
+            "src": "/templates/light/slide-7.jpg",
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1920.0,
+            "h": 1080.0
+          }
+        ]
+      }
+    ],
+    "original": "/templates/Adda247 Class PPT Light.pptx"
+  }
+}
