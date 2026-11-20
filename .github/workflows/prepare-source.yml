@@ -1,0 +1,64 @@
+name: Prepare ClassCraft source
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: classcraft-source-setup
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+      - name: Require the original ZIP-only repository
+        run: test ! -f package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.16.0'
+      - name: Extract verified source archive
+        shell: python
+        run: |
+          from pathlib import Path, PurePosixPath
+          import hashlib, zipfile
+          archive = Path('ClassCraft-Adda247-Vercel.zip')
+          expected = '9ce18c335114d398415733872c8d6a33bfc2a4262221d59122800ac3bd60ca06'
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == expected, 'Archive changed; review it first.'
+          root = Path.cwd().resolve()
+          with zipfile.ZipFile(archive) as z:
+              for item in z.infolist():
+                  p = PurePosixPath(item.filename)
+                  assert p.parts[0] == 'ClassCraft-Adda247-Vercel'
+                  parts = p.parts[1:]
+                  if not parts or item.is_dir():
+                      continue
+                  assert not any(part in ('..', '.git', '.github') for part in parts)
+                  target = root.joinpath(*parts).resolve()
+                  assert target.is_relative_to(root)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(z.read(item))
+      - name: Apply verified dependency security updates
+        run: |
+          npm pkg set dependencies.katex=0.19.1 overrides.image-size=2.1.0
+          npm install --package-lock-only --ignore-scripts --no-fund
+          printf '\n*.zip\n' >> .vercelignore
+      - name: Install, build, test and audit
+        run: |
+          npm ci --no-fund
+          npm run build
+          npm test
+          npm audit
+      - name: Commit the verified Vercel application
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m 'Prepare verified ClassCraft app for Vercel deployment'
+          git push origin HEAD:main
