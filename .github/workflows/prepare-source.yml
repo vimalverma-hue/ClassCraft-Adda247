@@ -1,4 +1,4 @@
-name: Prepare ClassCraft source
+name: Verify ClassCraft deployment
 
 on:
   workflow_dispatch:
@@ -11,54 +11,74 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  prepare:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: main
-      - name: Require the original ZIP-only repository
-        run: test ! -f package.json
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: '24.16.0'
-      - name: Extract verified source archive
+      - name: Ensure Node ESM-compatible API imports
         shell: python
         run: |
-          from pathlib import Path, PurePosixPath
-          import hashlib, zipfile
-          archive = Path('ClassCraft-Adda247-Vercel.zip')
-          expected = '9ce18c335114d398415733872c8d6a33bfc2a4262221d59122800ac3bd60ca06'
-          assert hashlib.sha256(archive.read_bytes()).hexdigest() == expected, 'Archive changed; review it first.'
-          root = Path.cwd().resolve()
-          with zipfile.ZipFile(archive) as z:
-              for item in z.infolist():
-                  p = PurePosixPath(item.filename)
-                  assert p.parts[0] == 'ClassCraft-Adda247-Vercel'
-                  parts = p.parts[1:]
-                  if not parts or item.is_dir():
-                      continue
-                  assert not any(part in ('..', '.git', '.github') for part in parts)
-                  target = root.joinpath(*parts).resolve()
-                  assert target.is_relative_to(root)
-                  target.parent.mkdir(parents=True, exist_ok=True)
-                  target.write_bytes(z.read(item))
-      - name: Apply verified dependency security updates
+          from pathlib import Path
+          changes = {"api/health.ts":["../src/server/vercel"],"api/refine.ts":["../src/server/vercel"],"api/translate.ts":["../src/server/vercel"],"api/refinement/status.ts":["../../src/server/vercel"],"src/server/vercel.ts":["./index"],"src/server/index.ts":["./cloud"],"src/server/cloud.ts":["../refinement"],"src/refinement.ts":["./mcq","./answerKey"],"src/mcq.ts":["./questionText","./answerKey"],"src/answerKey.ts":["./questionText"]}
+          for filename, imports in changes.items():
+              path = Path(filename)
+              text = path.read_text(encoding='utf-8')
+              for name in imports:
+                  text = text.replace("'" + name + "'", "'" + name + ".js'")
+              path.write_text(text, encoding='utf-8')
+      - name: Include the production Node runtime regression test
         run: |
-          npm pkg set dependencies.katex=0.19.1 overrides.image-size=2.1.0
-          npm install --package-lock-only --ignore-scripts --no-fund
-          printf '\n*.zip\n' >> .vercelignore
+          cat > tests/vercel-runtime.test.ts <<'RUNTIME_TEST'
+          import {expect,it} from 'vitest';
+          import {execFileSync} from 'node:child_process';
+          import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+          import {resolve} from 'node:path';
+          
+          it('loads compiled API routes in real Node ESM without a bundler',()=>{
+            const output='test-output/vercel-runtime';
+            mkdirSync(output,{recursive:true});
+            const config=JSON.parse(readFileSync('tsconfig.json','utf8'));
+            config.compilerOptions={...config.compilerOptions,module:'NodeNext',moduleResolution:'NodeNext',noEmit:false,allowImportingTsExtensions:false,rootDir:'../..',outDir:'./compiled'};
+            config.include=['../../api/**/*.ts'];
+            writeFileSync(output+'/tsconfig.json',JSON.stringify(config));
+            execFileSync(process.execPath,['node_modules/typescript/bin/tsc','--project',output+'/tsconfig.json'],{stdio:'pipe'});
+            const script=`
+              import assert from 'node:assert/strict';
+              import health from './compiled/api/health.js';
+              import status from './compiled/api/refinement/status.js';
+              import refine from './compiled/api/refine.js';
+              import translate from './compiled/api/translate.js';
+              for(const key of ['GEMINI_API_KEY','OPENAI_API_KEY','GROQ_API_KEY'])delete process.env[key];
+              const origin='https://classcraft-test.example';
+              assert.equal((await health.fetch(new Request(origin+'/api/health'))).status,200);
+              assert.equal((await (await status.fetch(new Request(origin+'/api/refinement/status'))).json()).available,false);
+              assert.equal((await refine.fetch(new Request(origin+'/api/refine'))).status,405);
+              assert.equal((await translate.fetch(new Request(origin+'/api/translate'))).status,405);
+              console.log('Node ESM API smoke test passed');
+            `;
+            writeFileSync(output+'/smoke.mjs',script);
+            const result=execFileSync(process.execPath,[resolve(output+'/smoke.mjs')],{encoding:'utf8'});
+            expect(result).toContain('Node ESM API smoke test passed');
+          },30000);
+          RUNTIME_TEST
       - name: Install, build, test and audit
         run: |
           npm ci --no-fund
           npm run build
           npm test
           npm audit
-      - name: Commit the verified Vercel application
+      - name: Commit verified runtime fixes when needed
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -m 'Prepare verified ClassCraft app for Vercel deployment'
-          git push origin HEAD:main
+          git add api src tests
+          if ! git diff --cached --quiet; then
+            git commit -m 'Fix Node ESM API imports and test compiled runtime'
+            git push origin HEAD:main
+          fi
